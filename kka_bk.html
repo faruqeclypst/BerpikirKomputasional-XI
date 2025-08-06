@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan Kancil: Berpikir Komputasional</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .storybook {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 900px;
+            width: 100%;
+            min-height: 700px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page {
+            padding: 40px;
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .story-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .story-title {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .chapter-title {
+            color: #e74c3c;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #e74c3c;
+            padding-bottom: 10px;
+        }
+
+        .story-content {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: #34495e;
+            margin-bottom: 30px;
+            text-align: justify;
+        }
+
+        .problem-section {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            border-left: 5px solid #e67e22;
+        }
+
+        .problem-title {
+            color: #d35400;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .question {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .options {
+            margin: 15px 0;
+        }
+
+        .option {
+            display: block;
+            background: #ecf0f1;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .option:hover {
+            background: #d5dbdb;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            background: #3498db;
+            color: white;
+            border-color: #2980b9;
+        }
+
+        .option.correct {
+            background: #27ae60;
+            color: white;
+            border-color: #229954;
+        }
+
+        .option.incorrect {
+            background: #e74c3c;
+            color: white;
+            border-color: #c0392b;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px 0;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .continue-btn {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .continue-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .feedback {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .feedback.correct {
+            background: #d5f4e6;
+            border: 2px solid #27ae60;
+            color: #1e8449;
+        }
+
+        .feedback.incorrect {
+            background: #fadbd8;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+        }
+
+        .progress-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.5s ease;
+        }
+
+        .concept-badge {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin: 5px;
+        }
+
+        .story-illustration {
+            text-align: center;
+            font-size: 4em;
+            margin: 20px 0;
+            line-height: 1.2;
+        }
+
+        .flowchart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 2px solid #007bff;
+            overflow-x: auto;
+        }
+
+        .flowchart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 300px;
+        }
+
+        .flowchart-element {
+            margin: 10px 0;
+            padding: 15px 20px;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            min-width: 200px;
+            position: relative;
+        }
+
+        .start-end {
+            background: #28a745;
+            border-radius: 25px;
+        }
+
+        .process {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .decision {
+            background: #17a2b8;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            position: relative;
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+        }
+
+        .decision-text {
+            font-size: 0.85em;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .action {
+            background: #fd7e14;
+        }
+
+        .arrow {
+            font-size: 2em;
+            color: #6c757d;
+            margin: 5px 0;
+        }
+
+        .decision-branch {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        .branch {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .branch-label {
+            background: #6c757d;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            margin: 10px 0;
+        }
+
+        @media (max-width: 768px) {
+            .storybook {
+                margin: 10px;
+            }
+            
+            .page {
+                padding: 20px;
+            }
+            
+            .story-title {
+                font-size: 2em;
+            }
+            
+            .story-illustration {
+                font-size: 3em;
+            }
+
+            .decision {
+                width: 100px;
+                height: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="storybook">
+        <div class="progress-bar" id="progressBar"></div>
+        
+        <!-- Halaman 1: Pengenalan -->
+        <div class="page active" id="page1">
+            <div class="story-header">
+                <h1 class="story-title">🦌 Petualangan Kancil Cerdik 🦌</h1>
+                <p style="color: #7f8c8d; font-size: 1.1em;">Belajar Berpikir Komputasional melalui Cerita</p>
+            </div>
+            
+            <div class="story-illustration">
+                🌳🦌🌿🐅🌳
+            </div>
+            
+            <div class="story-content">
+                <p>Di hutan yang rimbun, hiduplah seekor <strong>Kancil</strong> yang sangat cerdik. Kancil selalu menggunakan kecerdasannya untuk menyelesaikan masalah dan mendapatkan apa yang diinginkannya. Namun, hutan ini juga dihuni oleh <strong>Harimau</strong> yang ganas dan hewan buas lainnya yang selalu mengancam.</p>
+                
+                <p>Hari ini, Kancil sangat haus dan ingin minum di sungai jernih di tengah hutan. Namun, di dekat sungai itu, Harimau sedang berjaga. Kancil harus menggunakan <strong>berpikir komputasional</strong> untuk menyelesaikan masalah ini!</p>
+            </div>
+            
+            <div class="problem-section">
+                <div class="problem-title">🧠 Konsep: Pengenalan Berpikir Komputasional</div>
+                <div class="question">
+                    <p><strong>Apa yang dimaksud dengan Berpikir Komputasional?</strong></p>
+                    <div class="options">
+                        <div class="option" data-answer="a">A. Cara berpikir seperti komputer yang hanya menggunakan angka</div>
+                        <div class="option" data-answer="b">B. Proses pemecahan masalah yang melibatkan dekomposisi, pengenalan pola, abstraksi, dan algoritma</div>
+                        <div class="option" data-answer="c">C. Kemampuan menggunakan software komputer dengan baik</div>
+                        <div class="option" data-answer="d">D. Cara menghitung matematika dengan cepat</div>
+                    </div>
+                    <button class="submit-btn" onclick="checkAnswer(1, 'b')">Jawab</button>
+                    <div class="feedback" id="feedback1"></div>
+                    <button class="continue-btn" id="continue1" onclick="nextPage(2)">Lanjutkan Cerita →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Halaman 2: Berpikir Komputasional Umum -->
+        <div class="page" id="page2">
+            <div class="story-header">
+                <h2 class="chapter-title">🎯 Memahami Masalah</h2>
+                <span class="concept-badge">Berpikir Komputasional</span>
+            </div>
+            
+            <div class="story-illustration">
+                🦌🤔💡🔍
+            </div>
+            
+            <div class="story-content">
+                <p>Kancil berdiri di tepi hutan, memandangi sungai yang jernih. Air sungai itu sangat menggoda, tetapi Harimau yang besar sedang berbaring di bawah pohon rindang tepat di sebelah sungai. Kancil tahu bahwa ia memerlukan pendekatan yang sistematis untuk menyelesaikan masalah ini.</p>
+                
+                <p>"Aku tidak bisa hanya mengandalkan keberuntungan," gumam Kancil. "Aku perlu menggunakan semua kemampuan berpikirku secara terstruktur."</p>
+            </div>
+            
+            <div class="problem-section">
+                <div class="problem-title">🎯 Konsep: Karakteristik Berpikir Komputasional</div>
+                <div class="question">
+                    <p><strong>Manakah yang BUKAN merupakan karakteristik utama dari berpikir komputasional?</strong></p>
+                    <div class="options">
+                        <div class="option" data-answer="a">A. Memecah masalah menjadi bagian-bagian kecil</div>
+                        <div class="option" data-answer="b">B. Mencari pola dalam data atau situasi</div>
+                        <div class="option" data-answer="c">C. Menghafal semua kemungkinan solusi yang pernah ada</div>
+                        <div class="option" data-answer="d">D. Membuat langkah-langkah sistematis untuk menyelesaikan masalah</div>
+                    </div>
+                    <button class="submit-btn" onclick="checkAnswer(2, 'c')">Jawab</button>
+                    <div class="feedback" id="feedback2"></div>
+                    <button class="continue-btn" id="continue2" onclick="nextPage(3)">Lanjutkan Cerita →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Halaman 3: Dekomposisi 1 -->
+        <div class="page" id="page3">
+            <div class="story-header">
+                <h2 class="chapter-title">📋 Bab 1: Menganalisis Masalah</h2>
+                <span class="concept-badge">Dekomposisi</span>
+            </div>
+            
+            <div class="story-illustration">
+                🦌💭 ➜ 🐅🌊🌳🐰🐸
+            </div>
+            
+            <div class="story-content">
+                <p>Kancil mulai mengamati situasi di sekitar sungai dengan teliti. Ia melihat:</p>
+                <ul style="margin: 15px 0; padding-left: 30px;">
+                    <li>🐅 <strong>Harimau</strong> sedang tidur di bawah pohon besar dekat sungai</li>
+                    <li>🐰 <strong>Kelinci</strong> sedang makan rumput tidak jauh dari sana</li>
+                    <li>🐸 <strong>Katak</strong> melompat-lompat di tepi sungai</li>
+                    <li>🌳 <strong>Pohon besar</strong> dengan dahan yang kuat di atas sungai</li>
+                    <li>🪨 <strong>Batu-batu besar</strong> tersebar di sekitar area</li>
+                </ul>
+                
+                <p>"Hmm, masalah ini cukup rumit," pikir Kancil. "Aku harus memecahnya menjadi bagian-bagian kecil agar lebih mudah diselesaikan!"</p>
+            </div>
+            
+            <div class="problem-section">
+                <div class="problem-title">🔍 Konsep: Dekomposisi</div>
+                <div class="question">
+                    <p><strong>Kancil ingin memecah masalahnya menjadi sub-masalah yang lebih kecil. Manakah dekomposisi yang PALING tepat?</strong></p>
+                    <div class="options">
+                        <div class="option" data-answer="a">A. 1) Lari cepat ke sungai 2) Minum air 3) Lari kembali</div>
+                        <div class="option" data-answer="b">B. 1) Mengalihkan perhatian Harimau 2) Mencari jalur aman ke sungai 3) Minum air tanpa terdeteksi 4) Kembali dengan aman</div>
+                        <div class="option" data-answer="c">C. 1) Bertarung dengan Harimau 2) Mengusir semua hewan 3) Menguasai sungai</div>
+                        <div class="option" data-answer="d">D. 1) Menunggu Harimau pergi 2) Minum air</div>
+                    </div>
+                    <button class="submit-btn" onclick="checkAnswer(3, 'b')">Jawab</button>
+                    <div class="feedback" id="feedback3"></div>
+                    <button class="continue-btn" id="continue3" onclick="nextPage(4)">Lanjutkan Cerita →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Halaman 4: Dekomposisi 2 -->
+        <div class="page" id="page4">
+            <div class="story-header">
+                <h2 class="chapter-title">🔧 Merinci Sub-Masalah</h2>
+                <span class="concept-badge">Dekomposisi Lanjutan</span>
+            </div>
+            
+            <div class="story-illustration">
+                🦌📝 ➜ 1️⃣➜2️⃣➜3️⃣➜4️⃣
+            </div>
+            
+            <div class="story-content">
+                <p>Setelah memecah masalah utama, Kancil menyadari bahwa setiap sub-masalah juga perlu dipecah lebih detail lagi. Ia fokus pada sub-masalah pertama: "Mengalihkan perhatian Harimau".</p>
+                
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <h4>🎯 Sub-masalah: Mengalihkan Perhatian Harimau</h4>
+                    <p><strong>Dapat dipecah menjadi:</strong></p>
+                    <ul style="padding-left: 20px;">
+                        <li>Mencari hewan yang bisa dimanfaatkan</li>
+                        <li>Menentukan cara membuat hewan tersebut bergerak</li>
+                        <li>Memastikan arah gerakan hewan menjauh dari sungai</li>
+                        <li>Menghitung waktu yang tepat untuk bertindak</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="problem-section">
+                <div class="problem-title">🔍 Konsep: Dekomposisi Hierarkis</div>
+                <div class="question">
+                    <p><strong>Mengapa penting untuk memecah sub-masalah menjadi bagian yang lebih kecil lagi?</strong></p>
+                    <div class="options">
+                        <div class="option" data-answer="a">A. Agar masalah terlihat lebih rumit dan menantang</div>
+                        <div class="option" data-answer="b">B. Untuk membuat setiap langkah menjadi lebih spesifik dan mudah dieksekusi</div>
+                        <div class="option" data-answer="c">C. Supaya membutuhkan waktu lebih lama untuk menyelesaikan</div>
+                        <div class="option" data-answer="d">D. Agar bisa melibatkan lebih banyak hewan dalam rencana</div>
+                    </div>
+                    <button class="submit-btn" onclick="checkAnswer(4, 'b')">Jawab</button>
+                    <div class="feedback" id="feedback4"></div>
+                    <button class="continue-btn" id="continue4" onclick="nextPage(5)">Lanjutkan Cerita →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Halaman 5: Pengenalan Pola 1 -->
+        <div class="page" id="page5">
+            <div class="story-header">
+                <h2 class="chapter-title">🔍 Bab 2: Mencari Pola Perilaku</h2>
+                <span class="concept-badge">Pengenalan Pola</span>
+            </div>
+            
+            <div class="story-illustration">
+                🦌👀 ➜ 🐅😴💤 ➜ 🐰🥕 ➜ 🐸🦟
+            </div>
+            
+            <div class="story-content">
+                <p>Kancil mulai mengamati pola perilaku hewan-hewan di sekitar sungai. Setelah mengamati selama beberapa waktu, ia menemukan pola-pola menarik:</p>
+                
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <h4>🕐 Pola Waktu Harimau:</h4>
+                    <p>• Pukul 10:00 - Tidur di bawah pohon (30 menit)</p>
+                    <p>• Pukul 10:30 - Bangun, minum air (5 menit)</p>
+                    <p>• Pukul 10:35 - Patroli keliling (15 menit)</p>
+                    <p>• Pukul 10:50 - Kembali tidur (30 menit)</p>
+                    
+                    <h4>🐰 Pola Kelinci:</h4>
+                    <p>• Selalu panik dan berteriak keras saat melihat bahaya</p>
+                    <p>• Berlari ke arah yang berlawanan dari ancaman</p>
+                </div>
+            </div>
+            
+            <div class="problem-section">
+                <div class="problem-title">🎯 Konsep: Pengenalan Pola</div>
+                <div class="question">
+                    <p><strong>Berdasarkan pola yang diamati Kancil, kapan waktu TERBAIK untuk melaksanakan rencana?</strong></p>
+                    <div class="options">
+                        <div class="option" data-answer="a">A. Pukul 10:00 saat Harimau baru mulai tidur</div>
+                        <div class="option" data-answer="b">B. Pukul 10:30 saat Harimau sedang minum</div>
+                        <div class="option" data-answer="c">C. Pukul 10:40 saat Harimau sedang patroli jauh dari sungai</div>
+                        <div class="option" data-answer="d">D. Pukul 10:50 saat Harimau baru kembali tidur</div>
+                    </div>
+                    <button class="submit-btn" onclick="checkAnswer(5, 'c')">Jawab</button>
+                    <div class="feedback" id="feedback5"></div>
+                    <button class="continue-btn" id="continue5" onclick="nextPage(6)">Lanjutkan Cerita →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Halaman 6: Pengenalan Pola 2 -->
+        <div class="page" id="page6">
+            <div class="story-header">
+                <h2 class="chapter-title">🔄 Pola Berulang</h2>
+                <span class="concept-badge">Pengenalan Pola</span>
+            </div>
+            
+            <div class="story-illustration">
+                🐸🦟 ➜ 🔊💦 ➜ 🐅👂
+            </div>
+            
+            <div class="story-content">
+                <p>Kancil terus mengamati dan menemukan pola lain yang menarik:</p>
+                
+                <div style="background: #e8f5e8; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <h4>🐸 Pola Katak:</h4>
+                    <p>• Setiap 10 menit, katak menangkap serangga dengan suara "PLOP!"</p>
+                    <p>• Suara ini selalu membuat Harimau mengangkat kepala sebentar</p>
+                    <p>• Setelah 2-3 detik, Harimau kembali tidur atau melanjutkan aktivitas</p>
+                    
+                    <h4>🦅 Pola Burung:</h4>
+                    <p>• Burung berkicau setiap pagi dan sore</p>
+                    <p>• Saat ada predator, burung langsung terbang dan berteriak peringatan</p>
+                    <p>• Semua hewan kecil akan berlari mencari tempat persembunyian</p>
+                </div>
+                
+                <p>"Aha! Pola-pola ini bisa kumanfaatkan untuk rencanaku," pikir Kancil sambil tersenyum licik.</p>
+            </div>
+            
+            <div class="problem-section">
+                <div class="problem-title">🎯 Konsep: Menggunakan Pola</div>
+                <div class="question">
+                    <p><strong>Bagaimana Kancil bisa memanfaatkan pola perilaku katak untuk keuntungannya?</strong></p>
+                    <div class="options">
+                        <div class="option" data-answer="a">A. Menunggu katak menangkap serangga, lalu minum saat Harimau teralihkan sebentar</div>
+                        <div class="option" data-answer="b">B. Membuat suara "PLOP" palsu untuk mengalihkan perhatian Harimau</div>
+                        <div class="option" data-answer="c">C. Menakuti katak agar tidak bersuara</div>
+                        <div class="option" data-answer="d">D. Menggunakan katak sebagai umpan untuk Harimau</div>
+                    </div>
+                    <button class="submit-btn" onclick="checkAnswer(6, 'b')">Jawab</button>
+                    <div class="feedback" id="feedback6"></div>
+                    <button class="continue-btn" id="continue6" onclick="nextPage(7)">Lanjutkan Cerita →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Halaman 7: Abstraksi 1 -->
+        <div class="page" id="page7">
+            <div class="story-header">
+                <h2 class="chapter-title">🎭 Bab 3: Menyederhanakan Rencana</h2>
+                <span class="concept-badge">Abstraksi</span>
+            </div>
+            
+            <div class="story-illustration">
+                🦌🧠 ➜ 📝✨ ➜ 🎯
+            </div>
+            
+            <div class="story-content">
+                <p>Sekarang Kancil perlu menyederhanakan rencananya dengan fokus pada hal-hal yang paling penting saja. Ia harus mengabaikan detail-detail yang tidak perlu dan berkonsentrasi pada inti masalahnya.</p>
+                
+                <div style="background: #e8f5e8; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <h4>🎯 Rencana Detail Kancil:</h4>
+                    <p><strong>Tujuan Utama:</strong> Minum air di sungai dengan aman</p>
+                    <p><strong>Hambatan Utama:</strong> Harimau yang menjaga area sungai</p>
+                    <p><strong>Sumber Daya:</strong> Kelinci yang mudah panik, pola perilaku Harimau</p>
+                    <p><strong>Strategi Inti:</strong> Pengalihan perhatian menggunakan Kelinci</p>
+                </div>
+                
+                <p>Kancil menyadari bahwa ia tidak perlu memikirkan warna bulu Kelinci, jenis rumput yang dimakan, atau suara burung di kejauhan. Yang penting adalah <strong>kapan</strong> dan <strong>bagaimana</strong> membuat Kelinci panik pada waktu yang tepat.</p>
+            </div>
+            
+            <div class="problem-section">
+                <div class="problem-title">🎨 Konsep: Abstraksi</div>
+                <div class="question">
+                    <p><strong>Dalam konteks abstraksi, manakah informasi yang TIDAK perlu dipertimbangkan Kancil dalam rencananya?</strong></p>
+                    <div class="options">
+                        <div class="option" data-answer="a">A. Waktu siklus tidur Harimau</div>
+                        <div class="option" data-answer="b">B. Arah lari Kelinci saat panik</div>
+                        <div class="option" data-answer="c">C. Warna bulu Kelinci dan jenis makanan yang dimakannya</div>
+                        <div class="option" data-answer="d">D. Posisi Harimau saat sedang patroli</div>
+                    </div>
+                    <button class="submit-btn" onclick="checkAnswer(7, 'c')">Jawab</button>
+                    <div class="feedback" id="feedback7"></div>
+                    <button class="continue-btn" id="continue7" onclick="nextPage(8)">Lanjutkan Cerita →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Halaman 8: Abstraksi 2 -->
+        <div class="page" id="page8">
+            <div class="story-header">
+                <h2 class="chapter-title">🔍 Fokus pada Esensi</h2>
+                <span class="concept-badge">Abstraksi</span>
+            </div>
+            
+            <div class="story-illustration">
+                🦌🎯 ➜ ❌🌿🦋🌸 ➜ ✅⏰🐰🐅
+            </div>
+            
+            <div class="story-content">
+                <p>Kancil membuat daftar semua informasi yang ia kumpulkan, lalu memisahkan mana yang penting dan mana yang tidak:</p>
+                
+                <div style="display: flex; gap: 20px; margin: 20px 0;">
+                    <div style="background: #d5f4e6; padding: 15px; border-radius: 10px; flex: 1;">
+                        <h4 style="color: #27ae60;">✅ PENTING (Perlu Dipertimbangkan)</h4>
+                        <ul style="padding-left: 20px; color: #1e8449;">
+                            <li>Jadwal aktivitas Harimau</li>
+                            <li>Reaksi Kelinci terhadap ancaman</li>
+                            <li>Jarak antara Kelinci dan Harimau</li>
+                            <li>Posisi sungai relatif terhadap hewan lain</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background: #fadbd8; padding: 15px; border-radius: 10px; flex: 1;">
+                        <h4 style="color: #e74c3c;">❌ TIDAK PENTING (Bisa Diabaikan)</h4>
+                        <ul style="padding-left: 20px; color: #c0392b;">
+                            <li>Warna dan ukuran Kelinci</li>
+                            <li>Jenis rumput yang dimakan Kelinci</li>
+                            <li>Cuaca hari ini</li>
+                            <li>Suara burung di kejauhan</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="problem-section">
+                <div class="problem-title">🎨 Konsep: Tingkat Abstraksi</div>
+                <div class="question">
+                    <p><strong>Manakah contoh abstraksi yang PALING tepat untuk situasi Kancil?</strong></p>
+                    <div class="options">
+                        <div class="option" data-answer="a">A. "Kelinci coklat berukuran sedang makan rumput hijau di bawah pohon oak"</div>
+                        <div class="option" data-answer="b">B. "Hewan yang mudah panik berada di posisi strategis untuk mengalihkan predator"</div>
+                        <div class="option" data-answer="c">C. "Ada banyak hewan di sekitar sungai pada hari yang cerah"</div>
+                        <div class="option" data-answer="d">D. "Kelinci sedang makan dan Harimau sedang tidur"</div>
+                    </div>
+                    <button class="submit-btn" onclick="checkAnswer(8, 'b')">Jawab</button>
+                    <div class="feedback" id="feedback8"></div>
+                    <button class="continue-btn" id="continue8" onclick="nextPage(9)">Lanjutkan Cerita →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Halaman 9: Algoritma 1 -->
+        <div class="page" id="page9">
+            <div class="story-header">
+                <h2 class="chapter-title">⚙️ Bab 4: Menyusun Langkah-Langkah</h2>
+                <span class="concept-badge">Algoritma</span>
+            </div>
+            
+            <div class="story-illustration">
+                🦌📋 ➜ 1️⃣2️⃣3️⃣4️⃣5️⃣
+            </div>
+            
+            <div class="story-content">
+                <p>Saatnya Kancil menyusun algoritma - langkah-langkah terurut untuk menyelesaikan masalahnya. Setiap langkah harus jelas, dapat dilakukan, dan dalam urutan yang tepat.</p>
+                
+                <div style="background: #fff3cd; padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 5px solid #ffc107;">
+                    <h4>🔄 Algoritma Kancil:</h4>
+                    <ol style="padding-left: 20px; line-height: 2;">
+                        <li><strong>TUNGGU</strong> sampai Harimau mulai patroli (pukul 10:35)</li>
+                        <li><strong>DEKATI</strong> Kelinci secara diam-diam dari belakang</li>
+                        <li><strong>BUAT</strong> suara keras tiba-tiba untuk menakuti Kelinci</li>
+                        <li><strong>PASTIKAN</strong> Kelinci berlari ke arah berlawanan dari sungai</li>
+                        <li><strong>TUNGGU</strong> Harimau mengejar Kelinci</li>
+                        <li><strong>LARI</strong> cepat ke sungai saat area kosong</li>
+                        <li><strong>MINUM</strong> air secukupnya</li>
+                        <li><strong>SEMBUNYI</strong> di balik batu besar sampai aman</li>
+                    </ol>
+                </div>
+                
+                <p>"Sempurna! Rencana ini pasti berhasil," gumam Kancil sambil mengangguk puas.</p>
+            </div>
+            
+            <div class="problem-section">
+                <div class="problem-title">⚡ Konsep: Algoritma</div>
+                <div class="question">
+                    <p><strong>Apa yang akan terjadi jika Kancil mengubah urutan langkah 2 dan 3 dalam algoritmanya?</strong></p>
+                    <div class="options">
+                        <div class="option" data-answer="a">A. Tidak ada masalah, hasilnya akan sama</div>
+                        <div class="option" data-answer="b">B. Kelinci akan mendengar Kancil mendekat dan kabur lebih dulu</div>
+                        <div class="option" data-answer="c">C. Harimau akan lebih cepat datang</div>
+                        <div class="option" data-answer="d">D. Kancil akan lebih cepat sampai di sungai</div>
+                    </div>
+                    <button class="submit-btn" onclick="checkAnswer(9, 'b')">Jawab</button>
+                    <div class="feedback" id="feedback9"></div>
+                    <button class="continue-btn" id="continue9" onclick="nextPage(10)">Lanjutkan Cerita →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Halaman 10: Algoritma 2 -->
+        <div class="page" id="page10">
+            <div class="story-header">
+                <h2 class="chapter-title">🔄 Algoritma dengan Kondisi</h2>
+                <span class="concept-badge">Algoritma</span>
+            </div>
+            
+            <div class="story-illustration">
+                🦌🤔 ➜ ❓➜✅❌
+            </div>
+            
+            <div class="story-content">
+                <p>Kancil menyadari bahwa algoritmanya perlu mempertimbangkan berbagai kemungkinan yang bisa terjadi. Tidak semua situasi akan berjalan persis seperti rencana.</p>
+                
+                <div style="background: #f0f8ff; padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 5px solid #007bff;">
+                    <h4>🔄 Algoritma dengan Kondisi:</h4>
+                    <ol style="padding-left: 20px; line-height: 2;">
+                        <li><strong>JIKA</strong> Harimau mulai patroli <strong>MAKA</strong> lanjut ke langkah 2</li>
+                        <li><strong>JIKA</strong> Kelinci masih di posisi <strong>MAKA</strong> dekati dari belakang</li>
+                        <li><strong>JIKA</strong> berhasil menakuti Kelinci <strong>MAKA</strong> tunggu reaksi Harimau</li>
+                        <li><strong>JIKA</strong> Harimau mengejar Kelinci <strong>MAKA</strong> lari ke sungai</li>
+                        <li><strong>JIKA TIDAK</strong> berhasil <strong>MAKA</strong> kembali ke langkah 1</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <div class="problem-section">
+                <div class="problem-title">⚡ Konsep: Algoritma Bersyarat</div>
+                <div class="question">
+                    <p><strong>Mengapa penting untuk menambahkan kondisi "JIKA-MAKA" dalam algoritma Kancil?</strong></p>
+                    <div class="options">
+                        <div class="option" data-answer="a">A. Untuk membuat algoritma terlihat lebih rumit</div>
+                        <div class="option" data-answer="b">B. Untuk mengantisipasi berbagai kemungkinan dan membuat algoritma lebih fleksibel</div>
+                        <div class="option" data-answer="c">C. Untuk memperlambat proses eksekusi</div>
+                        <div class="option" data-answer="d">D. Untuk mengurangi jumlah langkah yang diperlukan</div>
+                    </div>
+                    <button class="submit-btn" onclick="checkAnswer(10, 'b')">Jawab</button>
+                    <div class="feedback" id="feedback10"></div>
+                    <button class="continue-btn" id="continue10" onclick="nextPage(11)">Lanjutkan Cerita →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Halaman 11: Pseudocode 1 -->
+        <div class="page" id="page11">
+            <div class="story-header">
+                <h2 class="chapter-title">📝 Bab 5: Menulis Rencana Detail</h2>
+                <span class="concept-badge">Pseudocode</span>
+            </div>
+            
+            <div class="story-illustration">
+                🦌💻 ➜ 📄🔤
+            </div>
+            
+            <div class="story-content">
+                <p>Kancil memutuskan untuk menuliskan rencananya dalam bentuk pseudocode - bahasa yang lebih terstruktur namun masih mudah dipahami. Ini akan membantunya memastikan tidak ada langkah yang terlewat.</p>
+                
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; font-family: 'Courier New', monospace; border: 2px solid #6c757d;">
+                    <h4 style="font-family: 'Comic Sans MS', cursive;">📋 Pseudocode Rencana Kancil:</h4>
+                    <pre style="color: #495057; line-height: 1.6;">
+MULAI RencanaMinum
+    JIKA waktu = 10:35 DAN harimau = "patroli" MAKA
+        posisi ← "di_belakang_kelinci"
+        BUAT suara_keras
+        
+        JIKA kelinci = "panik" MAKA
+            TUNGGU harimau_mengejar_kelinci
+            
+            JIKA area_sungai = "kosong" MAKA
+                LARI ke_sungai
+                MINUM air
+                SEMBUNYI di_balik_batu
+                status ← "berhasil"
+            SELAIN_ITU
+                TUNGGU lagi
+            AKHIR_JIKA
+        SELAIN_ITU
+            ULANGI rencana
+        AKHIR_JIKA
+    SELAIN_ITU
+        TUNGGU waktu_yang_tepat
+    AKHIR_JIKA
+SELESAI
+                    </pre>
+                </div>
+            </div>
+            
+            <div class="problem-section">
+                <div class="problem-title">💡 Konsep: Pseudocode</div>
+                <div class="question">
+                    <p><strong>Apa keuntungan utama menggunakan pseudocode dalam perencanaan Kancil?</strong></p>
+                    <div class="options">
+                        <div class="option" data-answer="a">A. Membuat rencana terlihat lebih rumit dan canggih</div>
+                        <div class="option" data-answer="b">B. Membantu mengidentifikasi kondisi dan kemungkinan yang berbeda, serta memastikan logika yang jelas</div>
+                        <div class="option" data-answer="c">C. Membuat rencana hanya bisa dipahami oleh Kancil</div>
+                        <div class="option" data-answer="d">D. Mengurangi jumlah langkah yang diperlukan</div>
+                    </div>
+                    <button class="submit-btn" onclick="checkAnswer(11, 'b')">Jawab</button>
+                    <div class="feedback" id="feedback11"></div>
+                    <button class="continue-btn" id="continue11" onclick="nextPage(12)">Lanjutkan Cerita →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Halaman 12: Pseudocode 2 -->
+        <div class="page" id="page12">
+            <div class="story-header">
+                <h2 class="chapter-title">🔧 Memperbaiki Pseudocode</h2>
+                <span class="concept-badge">Pseudocode</span>
+            </div>
+            
+            <div class="story-illustration">
+                🦌🔍 ➜ 📝✏️ ➜ ✅
+            </div>
+            
+            <div class="story-content">
+                <p>Setelah meninjau pseudocode-nya, Kancil menyadari ada beberapa hal yang perlu diperbaiki untuk membuatnya lebih robust dan menangani kasus-kasus khusus.</p>
+                
+                <div style="background: #fff3cd; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <h4>🔧 Perbaikan yang Diperlukan:</h4>
+                    <ul style="padding-left: 20px; line-height: 1.8;">
+                        <li><strong>Penanganan Error:</strong> Apa yang terjadi jika Kelinci tidak ada di tempat?</li>
+                        <li><strong>Timeout:</strong> Berapa lama maksimal menunggu setiap kondisi?</li>
+                        <li><strong>Plan B:</strong> Alternatif jika rencana utama gagal</li>
+                        <li><strong>Safety Check:</strong> Memastikan keamanan sebelum bertindak</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="problem-section">
+                <div class="problem-title">💡 Konsep: Pseudocode yang Robust</div>
+                <div class="question">
+                    <p><strong>Manakah penambahan yang PALING penting untuk membuat pseudocode Kancil lebih robust?</strong></p>
+                    <div class="options">
+                        <div class="option" data-answer="a">A. Menambahkan komentar untuk setiap baris</div>
+                        <div class="option" data-answer="b">B. Menambahkan penanganan kondisi jika Kelinci tidak ditemukan di lokasi yang diharapkan</div>
+                        <div class="option" data-answer="c">C. Menggunakan bahasa yang lebih teknis</div>
+                        <div class="option" data-answer="d">D. Menambahkan lebih banyak variabel</div>
+                    </div>
+                    <button class="submit-btn" onclick="checkAnswer(12, 'b')">Jawab</button>
+                    <div class="feedback" id="feedback12"></div>
+                    <button class="continue-btn" id="continue12" onclick="nextPage(13)">Lanjutkan Cerita →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Halaman 13: Flowchart 1 -->
+        <div class="page" id="page13">
+            <div class="story-header">
+                <h2 class="chapter-title">🔄 Bab 6: Diagram Alur Rencana</h2>
+                <span class="concept-badge">Flowchart</span>
+            </div>
+            
+            <div class="story-illustration">
+                🦌📊 ➜ ⬇️◆⬇️🔄
+            </div>
+            
+            <div class="story-content">
+                <p>Untuk memastikan rencananya sempurna, Kancil membuat flowchart - diagram yang menunjukkan alur keputusan dan tindakannya secara visual.</p>
+                
+                <div class="flowchart-container">
+                    <h4 style="color: #007bff; text-align: center;">🔄 Flowchart Rencana Kancil</h4>
+                    <div class="flowchart">
+                        <div class="flowchart-element start-end">🟢 MULAI</div>
+                        <div class="arrow">⬇️</div>
+                        <div class="flowchart-element process">⏰ Tunggu jam 10:35</div>
+                        <div class="arrow">⬇️</div>
+                        <div class="flowchart-element decision">
+                            <div class="decision-text">Harimau<br>patroli?</div>
+                        </div>
+                        
+                        <div class="decision-branch">
+                            <div class="branch">
+                                <div class="branch-label">❌ TIDAK</div>
+                                <div class="arrow">⬆️</div>
+                                <div style="font-size: 0.9em;">(kembali tunggu)</div>
+                            </div>
+                            <div class="branch">
+                                <div class="branch-label">✅ YA</div>
+                                <div class="arrow">⬇️</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flowchart-element action">🔊 Takuti Kelinci</div>
+                        <div class="arrow">⬇️</div>
+                        <div class="flowchart-element decision">
+                            <div class="decision-text">Kelinci<br>panik?</div>
+                        </div>
+                        
+                        <div class="decision-branch">
+                            <div class="branch">
+                                <div class="branch-label">❌ TIDAK</div>
+                                <div class="arrow">⬆️</div>
+                                <div style="font-size: 0.9em;">(ulangi)</div>
+                            </div>
+                            <div class="branch">
+                                <div class="branch-label">✅ YA</div>
+                                <div class="arrow">⬇️</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flowchart-element action">🏃 Lari ke Sungai</div>
+                        <div class="arrow">⬇️</div>
+                        <div class="flowchart-element action">💧 Minum Air</div>
+                        <div class="arrow">⬇️</div>
+                        <div class="flowchart-element start-end">🔴 SELESAI</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="problem-section">
+                <div class="problem-title">📈 Konsep: Flowchart</div>
+                <div class="question">
+                    <p><strong>Dalam flowchart Kancil, bentuk diamond (◆) yang diputar 45 derajat digunakan untuk menunjukkan apa?</strong></p>
+                    <div class="options">
+                        <div class="option" data-answer="a">A. Tindakan yang harus dilakukan</div>
+                        <div class="option" data-answer="b">B. Titik keputusan dengan pilihan YA/TIDAK</div>
+                        <div class="option" data-answer="c">C. Awal dan akhir proses</div>
+                        <div class="option" data-answer="d">D. Data yang diperlukan</div>
+                    </div>
+                    <button class="submit-btn" onclick="checkAnswer(13, 'b')">Jawab</button>
+                    <div class="feedback" id="feedback13"></div>
+                    <button class="continue-btn" id="continue13" onclick="nextPage(14)">Lanjutkan Cerita →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Halaman 14: Flowchart 2 -->
+        <div class="page" id="page14">
+            <div class="story-header">
+                <h2 class="chapter-title">📊 Simbol-Simbol Flowchart</h2>
+                <span class="concept-badge">Flowchart</span>
+            </div>
+            
+            <div class="story-illustration">
+                🔴🟡🔷◆➡️
+            </div>
+            
+            <div class="story-content">
+                <p>Kancil menyadari bahwa flowchart yang telah dibuatnya sangat membantu memvisualisasikan alur keputusan. Dengan diagram ini, ia bisa melihat dengan jelas setiap langkah dan kemungkinan yang ada dalam rencananya.</p>
+                
+                <p>"Wah, dengan flowchart ini aku jadi lebih yakin bahwa rencanaku akan berhasil!" gumam Kancil sambil melihat diagram yang telah dibuatnya. "Setiap kemungkinan sudah diperhitungkan dengan baik."</p>
+            </div>
+            
+            <div class="problem-section">
+                <div class="problem-title">📈 Konsep: Simbol Flowchart</div>
+                <div class="question">
+                    <p><strong>Jika Kancil ingin menambahkan langkah "Input: Cek posisi Harimau" dalam flowchartnya, simbol apa yang paling tepat digunakan?</strong></p>
+                    <div class="options">
+                        <div class="option" data-answer="a">A. Oval (bulat lonjong)</div>
+                        <div class="option" data-answer="b">B. Persegi panjang</div>
+                        <div class="option" data-answer="c">C. Jajar genjang (parallelogram)</div>
+                        <div class="option" data-answer="d">D. Diamond (belah ketupat)</div>
+                    </div>
+                    <button class="submit-btn" onclick="checkAnswer(14, 'c')">Jawab</button>
+                    <div class="feedback" id="feedback14"></div>
+                    <button class="continue-btn" id="continue14" onclick="nextPage(15)">Lanjutkan Cerita →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Halaman 15: Eksekusi dan Evaluasi -->
+        <div class="page" id="page15">
+            <div class="story-header">
+                <h2 class="chapter-title">🎯 Bab 7: Menjalankan Rencana</h2>
+                <span class="concept-badge">Implementasi</span>
+            </div>
+            
+            <div class="story-illustration">
+                🦌⚡ ➜ 🐰😱 ➜ 🐅🏃‍♂️ ➜ 💧😊
+            </div>
+            
+            <div class="story-content">
+                <p>Tepat pukul 10:35, Harimau mulai patroli seperti yang diprediksi Kancil. Dengan hati-hati, Kancil melaksanakan algoritmanya langkah demi langkah.</p>
+                
+                <div style="background: #e8f5e8; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <h4>⚡ Eksekusi Rencana:</h4>
+                    <p>✅ <strong>Langkah 1:</strong> Harimau mulai patroli - BERHASIL</p>
+                    <p>✅ <strong>Langkah 2:</strong> Mendekati Kelinci dari belakang - BERHASIL</p>
+                    <p>✅ <strong>Langkah 3:</strong> "GRAAHHH!" - Kelinci panik - BERHASIL</p>
+                    <p>✅ <strong>Langkah 4:</strong> Kelinci berlari menjauh dari sungai - BERHASIL</p>
+                    <p>✅ <strong>Langkah 5:</strong> Harimau mengejar Kelinci - BERHASIL</p>
+                    <p>✅ <strong>Langkah 6:</strong> Area sungai kosong, Kancil minum - BERHASIL</p>
+                </div>
+                
+                <p><strong>"Sempurna!"</strong> pikir Kancil sambil minum air segar. <em>"Berpikir komputasional benar-benar membantu menyelesaikan masalah dengan sistematis!"</em></p>
+            </div>
+            
+            <div class="problem-section">
+                <div class="problem-title">🎯 Konsep: Evaluasi Solusi</div>
+                <div class="question">
+                    <p><strong>Setelah berhasil melaksanakan rencananya, apa yang sebaiknya dilakukan Kancil untuk meningkatkan kemampuan berpikir komputasionalnya?</strong></p>
+                    <div class="options">
+                        <div class="option" data-answer="a">A. Langsung melupakan rencana karena sudah berhasil</div>
+                        <div class="option" data-answer="b">B. Mengevaluasi apa yang berhasil dan apa yang bisa diperbaiki untuk situasi serupa di masa depan</div>
+                        <div class="option" data-answer="c">C. Menggunakan rencana yang sama persis untuk semua masalah</div>
+                        <div class="option" data-answer="d">D. Menceritakan rencana kepada semua hewan agar mereka tahu</div>
+                    </div>
+                    <button class="submit-btn" onclick="checkAnswer(15, 'b')">Jawab</button>
+                    <div class="feedback" id="feedback15"></div>
+                    <button class="continue-btn" id="continue15" onclick="showCompletion()">Selesaikan Cerita 🎉</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Halaman Selesai -->
+        <div class="page" id="completion">
+            <div class="story-header">
+                <h1 class="story-title">🎊 Selamat! 🎊</h1>
+                <p style="color: #28a745; font-size: 1.3em; font-weight: bold;">Kamu telah menyelesaikan Petualangan Kancil!</p>
+            </div>
+            
+            <div class="story-illustration">
+                🏆🦌🎉🌟✨
+            </div>
+            
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 15px; margin: 20px 0; text-align: center;">
+                <h3>📚 Konsep yang Telah Dipelajari:</h3>
+                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 20px 0;">
+                    <span class="concept-badge" style="background: #28a745;">✅ Berpikir Komputasional</span>
+                    <span class="concept-badge" style="background: #17a2b8;">✅ Dekomposisi</span>
+                    <span class="concept-badge" style="background: #ffc107; color: #000;">✅ Pengenalan Pola</span>
+                    <span class="concept-badge" style="background: #fd7e14;">✅ Abstraksi</span>
+                    <span class="concept-badge" style="background: #6f42c1;">✅ Algoritma</span>
+                    <span class="concept-badge" style="background: #20c997;">✅ Pseudocode</span>
+                    <span class="concept-badge" style="background: #e83e8c;">✅ Flowchart</span>
+                </div>
+                
+                <p style="font-size: 1.1em; margin: 20px 0;">
+                    Kamu telah belajar bagaimana memecahkan masalah kompleks dengan pendekatan yang sistematis, 
+                    sama seperti yang dilakukan Kancil dalam petualangannya!
+                </p>
+                
+                <div style="background: rgba(255,255,255,0.2); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <h4>🌟 Skor Akhir: <span id="finalScore">0</span>/15</h4>
+                    <p>Tingkat Pemahaman: <span id="gradeLevel">Pemula</span></p>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <button class="submit-btn" onclick="restartStory()" style="background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);">
+                    🔄 Mulai Lagi
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        let score = 0;
+        let selectedAnswers = {};
+
+        function selectOption(element, answer) {
+            // Remove previous selections
+            const options = element.parentNode.querySelectorAll('.option');
+            options.forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Select current option
+            element.classList.add('selected');
+            selectedAnswers[currentPage] = answer;
+        }
+
+        function checkAnswer(pageNum, correctAnswer) {
+            const options = document.querySelectorAll(`#page${pageNum} .option`);
+            const feedback = document.getElementById(`feedback${pageNum}`);
+            const continueBtn = document.getElementById(`continue${pageNum}`);
+            const submitBtn = document.querySelector(`#page${pageNum} .submit-btn`);
+            
+            let selectedAnswer = null;
+            let selectedElement = null;
+            
+            options.forEach(option => {
+                if (option.classList.contains('selected')) {
+                    selectedAnswer = option.getAttribute('data-answer');
+                    selectedElement = option;
+                }
+            });
+            
+            if (!selectedAnswer) {
+                alert('Silakan pilih jawaban terlebih dahulu!');
+                return;
+            }
+            
+            // Disable submit button
+            submitBtn.disabled = true;
+            
+            // Show correct/incorrect styling
+            options.forEach(option => {
+                const answer = option.getAttribute('data-answer');
+                if (answer === correctAnswer) {
+                    option.classList.add('correct');
+                } else if (option.classList.contains('selected') && answer !== correctAnswer) {
+                    option.classList.add('incorrect');
+                }
+            });
+            
+            // Show feedback
+            feedback.style.display = 'block';
+            if (selectedAnswer === correctAnswer) {
+                score++;
+                feedback.className = 'feedback correct';
+                feedback.innerHTML = `
+                    <h4>🎉 Benar!</h4>
+                    <p>Excellent! Kamu memahami konsep ini dengan baik. Mari lanjutkan petualangan Kancil!</p>
+                `;
+            } else {
+                feedback.className = 'feedback incorrect';
+                const explanations = {
+                    1: "Berpikir komputasional adalah proses pemecahan masalah yang melibatkan dekomposisi, pengenalan pola, abstraksi, dan algoritma - bukan hanya tentang komputer!",
+                    2: "Berpikir komputasional bukan tentang menghafal solusi, tapi tentang mengembangkan kemampuan berpikir sistematis untuk memecahkan masalah baru.",
+                    3: "Dekomposisi yang baik memecah masalah menjadi langkah-langkah logis yang dapat dikelola, seperti mengalihkan perhatian dulu sebelum bergerak.",
+                    4: "Memecah sub-masalah membuat setiap langkah lebih spesifik dan mudah dieksekusi, mengurangi kemungkinan error.",
+                    5: "Waktu terbaik adalah saat Harimau sedang patroli jauh dari sungai, memberikan kesempatan terbaik untuk Kancil.",
+                    6: "Dengan memahami pola suara katak, Kancil bisa meniru suara tersebut untuk mengalihkan perhatian Harimau.",
+                    7: "Abstraksi berarti fokus pada informasi penting dan mengabaikan detail yang tidak relevan dengan tujuan utama.",
+                    8: "Abstraksi yang baik fokus pada fungsi dan peran, bukan pada detail fisik yang tidak mempengaruhi rencana.",
+                    9: "Urutan dalam algoritma sangat penting! Jika Kancil membuat suara dulu sebelum mendekat, Kelinci akan kabur sebelum Kancil siap.",
+                    10: "Kondisi 'JIKA-MAKA' membuat algoritma bisa menangani berbagai situasi yang mungkin terjadi, tidak hanya satu skenario.",
+                    11: "Pseudocode membantu mengidentifikasi berbagai kondisi dan kemungkinan, membuat logika menjadi lebih jelas dan terstruktur.",
+                    12: "Pseudocode yang robust harus menangani kasus-kasus khusus, seperti jika elemen yang diharapkan tidak ada di tempatnya.",
+                    13: "Dalam flowchart, bentuk diamond (belah ketupat) yang diputar 45 derajat selalu digunakan untuk menunjukkan titik keputusan dengan pilihan YA/TIDAK.",
+                    14: "Parallelogram (jajar genjang) digunakan untuk input/output data dalam flowchart, termasuk untuk mengecek atau mengambil informasi.",
+                    15: "Evaluasi dan refleksi adalah bagian penting dari berpikir komputasional untuk terus meningkatkan kemampuan pemecahan masalah."
+                };
+                feedback.innerHTML = `
+                    <h4>🤔 Belum tepat...</h4>
+                    <p>${explanations[pageNum]}</p>
+                    <p><strong>Tapi tidak apa-apa! Mari lanjutkan belajar.</strong></p>
+                `;
+            }
+            
+            // Show continue button
+            continueBtn.style.display = 'inline-block';
+            
+            // Update progress
+            updateProgress();
+        }
+
+        function nextPage(pageNum) {
+            document.getElementById(`page${currentPage}`).classList.remove('active');
+            document.getElementById(`page${pageNum}`).classList.add('active');
+            currentPage = pageNum;
+            updateProgress();
+        }
+
+        function showCompletion() {
+            document.getElementById(`page${currentPage}`).classList.remove('active');
+            document.getElementById('completion').classList.add('active');
+            
+            // Calculate final score and grade
+            document.getElementById('finalScore').textContent = score;
+            const percentage = (score / 15) * 100;
+            let grade = '';
+            
+            if (percentage >= 90) grade = 'Ahli Berpikir Komputasional! 🏆';
+            else if (percentage >= 80) grade = 'Sangat Baik 🌟';
+            else if (percentage >= 70) grade = 'Baik 👍';
+            else if (percentage >= 60) grade = 'Cukup Baik 📚';
+            else if (percentage >= 40) grade = 'Perlu Latihan Lagi 💪';
+            else grade = 'Ayo Belajar Lagi! 📖';
+            
+            document.getElementById('gradeLevel').textContent = grade;
+            updateProgress(100);
+        }
+
+        function updateProgress(override = null) {
+            const progressBar = document.getElementById('progressBar');
+            const progress = override !== null ? override : (currentPage / 15) * 100;
+            progressBar.style.width = progress + '%';
+        }
+
+        function restartStory() {
+            currentPage = 1;
+            score = 0;
+            selectedAnswers = {};
+            
+            // Reset all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById('page1').classList.add('active');
+            
+            // Reset all questions
+            document.querySelectorAll('.option').forEach(option => {
+                option.classList.remove('selected', 'correct', 'incorrect');
+            });
+            
+            document.querySelectorAll('.feedback').forEach(feedback => {
+                feedback.style.display = 'none';
+            });
+            
+            document.querySelectorAll('.continue-btn').forEach(btn => {
+                btn.style.display = 'none';
+            });
+            
+            document.querySelectorAll('.submit-btn').forEach(btn => {
+                btn.disabled = false;
+            });
+            
+            updateProgress();
+        }
+
+        // Add click event listeners to options
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.option').forEach(option => {
+                option.addEventListener('click', function() {
+                    selectOption(this, this.getAttribute('data-answer'));
+                });
+            });
+            
+            updateProgress();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96ac8b0e61e040e0',t:'MTc1NDQ2MjQzMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
